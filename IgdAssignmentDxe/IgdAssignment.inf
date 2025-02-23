@@ -1,0 +1,43 @@
+## @file
+# This driver enables Intel Graphics Device (IGD) assignment with vfio-pci
+# according to QEMU's "docs/igd-assign.txt" specification.
+#
+# Copyright (C) 2018, Red Hat, Inc.
+#
+# This program and the accompanying materials are licensed and made available
+# under the terms and conditions of the BSD License which accompanies this
+# distribution. The full text of the license may be found at
+# http://opensource.org/licenses/bsd-license.php
+#
+# THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS, WITHOUT
+# WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+##
+
+[Defines]
+  INF_VERSION                    = 1.27
+  BASE_NAME                      = IgdAssignmentDxe
+  FILE_GUID                      = FDD95992-8F3B-4ADD-8DEC-989EA84E9DF1
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = IgdAssignmentEntry
+
+[Sources]
+  IgdAssignment.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  OvmfPkg/OvmfPkg.dec
+
+[LibraryClasses]
+  BaseMemoryLib
+  DebugLib
+  PrintLib
+  QemuFwCfgLib
+  UefiBootServicesTableLib
+  UefiDriverEntryPoint
+
+[Protocols]
+  gEfiPciIoProtocolGuid ## SOMETIMES_CONSUMES ## NOTIFY
+
+[Depex]
+  TRUE
