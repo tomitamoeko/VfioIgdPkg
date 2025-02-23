@@ -35,6 +35,7 @@
 [Packages]
   MdePkg/MdePkg.dec
   OvmfPkg/OvmfPkg.dec
+  VfioIgdPkg/VfioIgdPkg.dec
 
 [LibraryClasses]
   BaseLib
