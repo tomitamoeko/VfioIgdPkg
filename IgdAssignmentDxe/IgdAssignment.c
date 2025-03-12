@@ -24,6 +24,8 @@
 #include <IndustryStandard/AssignedIgd.h>
 #include <IndustryStandard/IgdOpRegion.h>
 
+#include "IgdGeneration.h"
+
 //
 // structure that collects information from PCI config space that is needed to
 // evaluate whether IGD assignment applies to the device
@@ -36,6 +38,7 @@ typedef struct {
   UINTN  Bus;
   UINTN  Device;
   UINTN  Function;
+  INTN   Generation;
   CHAR8  Name[sizeof "0000:00:02.0"];
 } CANDIDATE_PCI_INFO;
 
@@ -464,6 +467,14 @@ PciIoNotify (
         PciInfo.ClassCode[2] != PCI_CLASS_DISPLAY ||
         PciInfo.ClassCode[1] != PCI_CLASS_DISPLAY_VGA ||
         PciInfo.ClassCode[0] != PCI_IF_VGA_VGA) {
+      continue;
+    }
+
+    //
+    // Check device generation
+    //
+    PciInfo.Generation = GetIgdGeneration (PciInfo.DeviceId);
+    if (PciInfo.Generation == -1) {
       continue;
     }
 
