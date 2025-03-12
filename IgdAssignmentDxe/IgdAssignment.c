@@ -403,13 +403,23 @@ SetupStolenMemory (
   //
   // Write address of stolen memory to PCI config space.
   //
-  Status = PciIo->Pci.Write (
-                        PciIo,
-                        EfiPciIoWidthUint32,
-                        ASSIGNED_IGD_PCI_BDSM_OFFSET,
-                        1,                            // Count
-                        &Address
-                        );
+  if (PciInfo->Generation < 11) {
+    Status = PciIo->Pci.Write (
+                          PciIo,
+                          EfiPciIoWidthUint32,
+                          ASSIGNED_IGD_PCI_BDSM_OFFSET,
+                          1,                            // Count
+                          &Address
+                          );
+  } else {
+    Status = PciIo->Pci.Write (
+                          PciIo,
+                          EfiPciIoWidthUint64,
+                          ASSIGNED_IGD_PCI_BDSM64_OFFSET,
+                          1,                            // Count
+                          &Address
+                          );
+  }
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "%a: %a: failed to write stolen memory address: %r\n",
       __FUNCTION__, GetPciName (PciInfo), Status));
