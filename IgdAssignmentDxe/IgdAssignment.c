@@ -30,6 +30,7 @@
 //
 typedef struct {
   UINT16 VendorId;
+  UINT16 DeviceId;
   UINT8  ClassCode[3];
   UINTN  Segment;
   UINTN  Bus;
@@ -82,6 +83,17 @@ InitPciInfo (
                         PCI_VENDOR_ID_OFFSET,
                         1,                    // Count
                         &PciInfo->VendorId
+                        );
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  Status = PciIo->Pci.Read (
+                        PciIo,
+                        EfiPciIoWidthUint16,
+                        PCI_DEVICE_ID_OFFSET,
+                        1,                    // Count
+                        &PciInfo->DeviceId
                         );
   if (EFI_ERROR (Status)) {
     return Status;
