@@ -28,7 +28,7 @@ Copyright (c)  1999  - 2019, Intel Corporation. All rights reserved
 #include <IndustryStandard/AssignedIgd.h>
 #include <IndustryStandard/IgdOpRegion.h>
 
-PLATFORM_GOP_POLICY_PROTOCOL  mPlatformGOPPolicy;
+PLATFORM_GOP_POLICY_PROTOCOL  mPlatformGopPolicy;
 EFI_PHYSICAL_ADDRESS mVbt;
 
 //
@@ -193,7 +193,7 @@ GetVbtData (
 
 EFI_STATUS
 EFIAPI
-PlatformGOPPolicyEntryPoint (
+PlatformGopPolicyEntryPoint (
   IN EFI_HANDLE       ImageHandle,
   IN EFI_SYSTEM_TABLE *SystemTable
   )
@@ -204,22 +204,22 @@ PlatformGOPPolicyEntryPoint (
   gBS = SystemTable->BootServices;
 
   gBS->SetMem (
-         &mPlatformGOPPolicy,
+         &mPlatformGopPolicy,
          sizeof (PLATFORM_GOP_POLICY_PROTOCOL),
          0
          );
 
-  mPlatformGOPPolicy.Revision                = PLATFORM_GOP_POLICY_PROTOCOL_REVISION_01;
-  mPlatformGOPPolicy.GetPlatformLidStatus    = GetPlatformLidStatus;
-  mPlatformGOPPolicy.GetVbtData              = GetVbtData;
+  mPlatformGopPolicy.Revision                = PLATFORM_GOP_POLICY_PROTOCOL_REVISION_01;
+  mPlatformGopPolicy.GetPlatformLidStatus    = GetPlatformLidStatus;
+  mPlatformGopPolicy.GetVbtData              = GetVbtData;
 
   //
   // Install protocol to allow access to this Policy.
   //  
   Status = gBS->InstallMultipleProtocolInterfaces (
                   &ImageHandle,
-                  &gPlatformGOPPolicyGuid,
-                  &mPlatformGOPPolicy,
+                  &gPlatformGopPolicyGuid,
+                  &mPlatformGopPolicy,
                   NULL
                   );
 

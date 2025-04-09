@@ -63,6 +63,6 @@ typedef struct _PLATFORM_GOP_POLICY_PROTOCOL {
 //
 // Extern the GUID for protocol users.
 //
-extern EFI_GUID  gPlatformGOPPolicyGuid;
+extern EFI_GUID  gPlatformGopPolicyGuid;
 
 #endif
