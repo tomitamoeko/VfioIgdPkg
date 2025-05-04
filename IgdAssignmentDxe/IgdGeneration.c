@@ -13,7 +13,47 @@
   WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
+#include <Library/DebugLib.h>
+
 #include "IgdGeneration.h"
+#include "IgdPciIds.h"
+
+typedef struct {
+  UINT16  DeviceId;
+  UINTN   Gen;
+} IGD_DEVICE_INFO;
+
+#define IGD_DEVICE(_id, _gen) { \
+  .DeviceId = _id, \
+  .Gen = _gen \
+}
+
+STATIC CONST IGD_DEVICE_INFO IgdDeviceTable[] = {
+  INTEL_SNB_IDS(IGD_DEVICE, 6),
+  INTEL_IVB_IDS(IGD_DEVICE, 6),
+  INTEL_HSW_IDS(IGD_DEVICE, 7),
+  INTEL_VLV_IDS(IGD_DEVICE, 7),
+  INTEL_BDW_IDS(IGD_DEVICE, 8),
+  INTEL_CHV_IDS(IGD_DEVICE, 8),
+  INTEL_SKL_IDS(IGD_DEVICE, 9),
+  INTEL_BXT_IDS(IGD_DEVICE, 9),
+  INTEL_KBL_IDS(IGD_DEVICE, 9),
+  INTEL_CFL_IDS(IGD_DEVICE, 9),
+  INTEL_WHL_IDS(IGD_DEVICE, 9),
+  INTEL_CML_IDS(IGD_DEVICE, 9),
+  INTEL_GLK_IDS(IGD_DEVICE, 9),
+  INTEL_ICL_IDS(IGD_DEVICE, 11),
+  INTEL_EHL_IDS(IGD_DEVICE, 11),
+  INTEL_JSL_IDS(IGD_DEVICE, 11),
+  INTEL_TGL_IDS(IGD_DEVICE, 12),
+  INTEL_RKL_IDS(IGD_DEVICE, 12),
+  INTEL_ADLS_IDS(IGD_DEVICE, 12),
+  INTEL_ADLP_IDS(IGD_DEVICE, 12),
+  INTEL_ADLN_IDS(IGD_DEVICE, 12),
+  INTEL_RPLS_IDS(IGD_DEVICE, 12),
+  INTEL_RPLU_IDS(IGD_DEVICE, 12),
+  INTEL_RPLP_IDS(IGD_DEVICE, 12),
+};
 
 /**
   Get the generation of IGD device based on Device ID
@@ -28,44 +68,17 @@ GetIgdGeneration (
   IN UINT16 DeviceId
   )
 {
-    /*
-     * Device IDs for Broxton/Apollo Lake are 0x0a84, 0x1a84, 0x1a85, 0x5a84
-     * and 0x5a85, match bit 11:1 here
-     * Prefix 0x0a is taken by Haswell, this rule should be matched first.
-     */
-    if ((DeviceId & 0xffe) == 0xa84) {
-        return 9;
-    }
+  INTN    Gen = -1;
+  UINTN   Index;
 
-    switch (DeviceId & 0xff00) {
-    case 0x0100:    /* SandyBridge, IvyBridge */
-        return 6;
-    case 0x0400:    /* Haswell */
-    case 0x0a00:    /* Haswell */
-    case 0x0c00:    /* Haswell */
-    case 0x0d00:    /* Haswell */
-    case 0x0f00:    /* Valleyview/Bay Trail */
-        return 7;
-    case 0x1600:    /* Broadwell */
-    case 0x2200:    /* Cherryview */
-        return 8;
-    case 0x1900:    /* Skylake */
-    case 0x3100:    /* Gemini Lake */
-    case 0x5900:    /* Kaby Lake */
-    case 0x3e00:    /* Coffee Lake */
-    case 0x9B00:    /* Comet Lake */
-        return 9;
-    case 0x8A00:    /* Ice Lake */
-    case 0x4500:    /* Elkhart Lake */
-    case 0x4E00:    /* Jasper Lake */
-        return 11;
-    case 0x9A00:    /* Tiger Lake */
-    case 0x4C00:    /* Rocket Lake */
-    case 0x4600:    /* Alder Lake */
-    case 0xA700:    /* Raptor Lake */
-        return 12;
+  for (Index = 0; Index < ARRAY_SIZE(IgdDeviceTable); Index++) {
+    if (DeviceId == IgdDeviceTable[Index].DeviceId) {
+      Gen = IgdDeviceTable[Index].Gen;
     }
+  }
 
-    /* Unknown device */
-    return -1;
+  DEBUG ((DEBUG_INFO, "%a: Device: %x, Generation: %d\n", __FUNCTION__, DeviceId, Gen));
+
+  /* Unknown device */
+  return Gen;
 }
