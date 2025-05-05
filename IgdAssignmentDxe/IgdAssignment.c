@@ -47,10 +47,7 @@ typedef struct {
 //
 STATIC FIRMWARE_CONFIG_ITEM mOpRegionItem;
 STATIC UINTN                mOpRegionSize;
-//
-// value read from ASSIGNED_IGD_FW_CFG_BDSM_SIZE, converted to UINTN
-//
-STATIC UINTN                mBdsmSize;
+
 //
 // gBS->LocateProtocol() helper for finding the next unhandled PciIo instance
 //
@@ -356,13 +353,15 @@ FreeOpRegion:
 
   @param[in] PciIo        The device to set up stolen memory for.
 
+  @param[in] Size         Size of stolen memory.
+
   @param[in,out] PciInfo  On input, PciInfo must have been initialized from
                           PciIo with InitPciInfo(). SetupStolenMemory() may
                           call GetPciName() on PciInfo, possibly modifying it.
 
   @retval EFI_SUCCESS            Stolen memory setup successful.
 
-  @retval EFI_INVALID_PARAMETER  mBdsmSize is zero.
+  @retval EFI_INVALID_PARAMETER  Stolen memory size is zero.
 
   @return                        Error codes propagated from underlying
                                  functions.
@@ -371,6 +370,7 @@ STATIC
 EFI_STATUS
 SetupStolenMemory (
   IN     EFI_PCI_IO_PROTOCOL *PciIo,
+  IN     UINTN               Size,
   IN OUT CANDIDATE_PCI_INFO  *PciInfo
   )
 {
@@ -378,10 +378,11 @@ SetupStolenMemory (
   EFI_STATUS           Status;
   EFI_PHYSICAL_ADDRESS Address;
 
-  if (mBdsmSize == 0) {
+  if (Size == 0) {
     return EFI_INVALID_PARAMETER;
   }
-  BdsmPages = EFI_SIZE_TO_PAGES (mBdsmSize);
+
+  BdsmPages = EFI_SIZE_TO_PAGES (Size);
 
   Status = Allocate32BitAlignedPagesWithType (
              EfiReservedMemoryType,
@@ -426,8 +427,8 @@ SetupStolenMemory (
     goto FreeStolenMemory;
   }
 
-  DEBUG ((DEBUG_INFO, "%a: %a: stolen memory @ 0x%Lx size 0x%Lx\n",
-    __FUNCTION__, GetPciName (PciInfo), Address, (UINT64)mBdsmSize));
+  DEBUG ((DEBUG_INFO, "%a: %a: stolen memory @ 0x%Lx, size %d MB\n",
+    __FUNCTION__, GetPciName (PciInfo), Address, Size / SIZE_1MB));
   return EFI_SUCCESS;
 
 FreeStolenMemory:
@@ -503,8 +504,8 @@ PciIoNotify (
       continue;
     }
 
-    if (mBdsmSize > 0) {
-      SetupStolenMemory (PciIo, &PciInfo);
+    if (PciInfo.Private->GetStolenSize) {
+      SetupStolenMemory (PciIo, PciInfo.Private->GetStolenSize (PciIo) ,&PciInfo);
     }
   }
 }
@@ -533,9 +534,6 @@ IgdAssignmentEntry (
   )
 {
   EFI_STATUS           OpRegionStatus;
-  EFI_STATUS           BdsmStatus;
-  FIRMWARE_CONFIG_ITEM BdsmItem;
-  UINTN                BdsmItemSize;
   EFI_STATUS           Status;
   EFI_EVENT            PciIoEvent;
 
@@ -544,50 +542,22 @@ IgdAssignmentEntry (
                      &mOpRegionItem,
                      &mOpRegionSize
                      );
-  BdsmStatus = QemuFwCfgFindFile (
-                 ASSIGNED_IGD_FW_CFG_BDSM_SIZE,
-                 &BdsmItem,
-                 &BdsmItemSize
-                 );
+
   //
   // If neither fw_cfg file is available, assume no IGD is assigned.
   //
-  if (EFI_ERROR (OpRegionStatus) && EFI_ERROR (BdsmStatus)) {
+  if (EFI_ERROR (OpRegionStatus)) {
     return EFI_UNSUPPORTED;
   }
 
   //
   // Require all fw_cfg files that are present to be well-formed.
   //
-  if (!EFI_ERROR (OpRegionStatus) && mOpRegionSize == 0)  {
+  if (mOpRegionSize == 0)  {
     DEBUG ((DEBUG_ERROR, "%a: %a: zero size\n", __FUNCTION__,
       ASSIGNED_IGD_FW_CFG_OPREGION));
     return EFI_PROTOCOL_ERROR;
   }
-
-  if (!EFI_ERROR (BdsmStatus)) {
-    UINT64 BdsmSize;
-
-    if (BdsmItemSize != sizeof BdsmSize) {
-      DEBUG ((DEBUG_ERROR, "%a: %a: invalid fw_cfg size: %Lu\n", __FUNCTION__,
-        ASSIGNED_IGD_FW_CFG_BDSM_SIZE, (UINT64)BdsmItemSize));
-      return EFI_PROTOCOL_ERROR;
-    }
-    QemuFwCfgSelectItem (BdsmItem);
-    QemuFwCfgReadBytes (BdsmItemSize, &BdsmSize);
-
-    if (BdsmSize == 0 || BdsmSize > MAX_UINTN) {
-      DEBUG ((DEBUG_ERROR, "%a: %a: invalid value: %Lu\n", __FUNCTION__,
-        ASSIGNED_IGD_FW_CFG_BDSM_SIZE, BdsmSize));
-      return EFI_PROTOCOL_ERROR;
-    }
-    mBdsmSize = (UINTN)BdsmSize;
-  }
-
-  //
-  // At least one valid fw_cfg file has been found.
-  //
-  ASSERT (mOpRegionSize > 0 || mBdsmSize > 0);
 
   //
   // Register PciIo protocol installation callback.
