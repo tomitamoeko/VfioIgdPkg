@@ -24,7 +24,7 @@
 #include <IndustryStandard/AssignedIgd.h>
 #include <IndustryStandard/IgdOpRegion.h>
 
-#include "IgdGeneration.h"
+#include "IgdPrivate.h"
 
 //
 // structure that collects information from PCI config space that is needed to
@@ -38,8 +38,8 @@ typedef struct {
   UINTN  Bus;
   UINTN  Device;
   UINTN  Function;
-  INTN   Generation;
   CHAR8  Name[sizeof "0000:00:02.0"];
+  CONST IGD_PRIVATE_DATA *Private;
 } CANDIDATE_PCI_INFO;
 
 //
@@ -403,7 +403,7 @@ SetupStolenMemory (
   //
   // Write address of stolen memory to PCI config space.
   //
-  if (PciInfo->Generation < 11) {
+  if (PciInfo->Private->Flags & IGD_FLAG_BDSM_32BIT) {
     Status = PciIo->Pci.Write (
                           PciIo,
                           EfiPciIoWidthUint32,
@@ -411,7 +411,7 @@ SetupStolenMemory (
                           1,                            // Count
                           &Address
                           );
-  } else {
+  } else if (PciInfo->Private->Flags & IGD_FLAG_BDSM_64BIT) {
     Status = PciIo->Pci.Write (
                           PciIo,
                           EfiPciIoWidthUint64,
@@ -483,8 +483,9 @@ PciIoNotify (
     //
     // Check device generation
     //
-    PciInfo.Generation = GetIgdGeneration (PciInfo.DeviceId);
-    if (PciInfo.Generation == -1) {
+    Status = GetIgdPrivateData (PciInfo.DeviceId, &PciInfo.Private);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR, "%a: GetIgdPrivateData: %r\n", __FUNCTION__, Status));
       continue;
     }
 

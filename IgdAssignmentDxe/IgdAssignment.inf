@@ -22,8 +22,8 @@
   ENTRY_POINT                    = IgdAssignmentEntry
 
 [Sources]
-  IgdGeneration.c
-  IgdGeneration.h
+  IgdPrivate.c
+  IgdPrivate.h
   IgdAssignment.c
 
 [Packages]
