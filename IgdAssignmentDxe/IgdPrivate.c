@@ -136,6 +136,11 @@ STATIC CONST IGD_PRIVATE_DATA Gen11Private = {
   .GetStolenSize = Gen9StolenSize,
 };
 
+STATIC CONST IGD_PRIVATE_DATA NullPrivate = {
+  .Flags = 0,
+  .GetStolenSize = NULL,
+};
+
 STATIC CONST IGD_DEVICE_INFO IgdDeviceTable[] = {
   INTEL_SNB_IDS(IGD_DEVICE, &Gen6Private),
   INTEL_IVB_IDS(IGD_DEVICE, &Gen6Private),
@@ -161,6 +166,10 @@ STATIC CONST IGD_DEVICE_INFO IgdDeviceTable[] = {
   INTEL_RPLS_IDS(IGD_DEVICE, &Gen11Private),
   INTEL_RPLU_IDS(IGD_DEVICE, &Gen11Private),
   INTEL_RPLP_IDS(IGD_DEVICE, &Gen11Private),
+  INTEL_MTL_IDS(IGD_DEVICE, &NullPrivate),
+  INTEL_ARL_IDS(IGD_DEVICE, &NullPrivate),
+  INTEL_LNL_IDS(IGD_DEVICE, &NullPrivate),
+  INTEL_PTL_IDS(IGD_DEVICE, &NullPrivate),
 };
 
 /**
