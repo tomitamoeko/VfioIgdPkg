@@ -476,8 +476,9 @@ PciIoNotify (
     //
     if (PciInfo.VendorId != ASSIGNED_IGD_PCI_VENDOR_ID ||
         PciInfo.ClassCode[2] != PCI_CLASS_DISPLAY ||
-        PciInfo.ClassCode[1] != PCI_CLASS_DISPLAY_VGA ||
-        PciInfo.ClassCode[0] != PCI_IF_VGA_VGA) {
+        ((PciInfo.ClassCode[1] != PCI_CLASS_DISPLAY_VGA ||
+        PciInfo.ClassCode[0] != PCI_IF_VGA_VGA) &&
+        PciInfo.ClassCode[1] != PCI_CLASS_DISPLAY_OTHER)) {
       continue;
     }
 
