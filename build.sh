@@ -15,7 +15,6 @@ DSC_PATH=$SCRIPT_DIR/VfioIgdPkg.dsc
 BUILD_TARGET=DEBUG
 BUILD_ARCH=X64
 BUILD_TOOLCHAIN=GCC
-BUILD_OUTPUT_DIR=$WORKSPACE/Build/VfioIgdPkg/"$BUILD_TARGET"_"$BUILD_TOOLCHAIN"/$BUILD_ARCH
 
 # EDK2 MdeModulePkg/Bus/Pci/PciBusDxe/PciOptionRomSupport.c does not check Device ID when loading
 # PCI Option ROM, any value is okay here
@@ -75,6 +74,8 @@ if [ -z $output_file ]; then
     help
     exit 1
 fi
+
+BUILD_OUTPUT_DIR=$WORKSPACE/Build/VfioIgdPkg/"$BUILD_TARGET"_"$BUILD_TOOLCHAIN"/$BUILD_ARCH
 
 build -b $BUILD_TARGET -a $BUILD_ARCH -t $BUILD_TOOLCHAIN -p $DSC_PATH
 
