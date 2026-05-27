@@ -135,7 +135,6 @@ InitPciInfo (
 
   @return                PciInfo->Name
 **/
-#if !defined(MDEPKG_NDEBUG)
 STATIC
 CONST CHAR8 *
 GetPciName (
@@ -155,7 +154,6 @@ GetPciName (
   }
   return PciInfo->Name;
 }
-#endif
 
 /**
   Allocate memory in the 32-bit address space, with the requested UEFI memory
