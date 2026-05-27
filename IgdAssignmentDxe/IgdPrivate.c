@@ -170,6 +170,9 @@ STATIC CONST IGD_DEVICE_INFO IgdDeviceTable[] = {
   INTEL_ARL_IDS(IGD_DEVICE, &NullPrivate),
   INTEL_LNL_IDS(IGD_DEVICE, &NullPrivate),
   INTEL_PTL_IDS(IGD_DEVICE, &NullPrivate),
+  INTEL_WCL_IDS(IGD_DEVICE, &NullPrivate),
+  INTEL_NVLS_IDS(IGD_DEVICE, &NullPrivate),
+  INTEL_NVLP_IDS(IGD_DEVICE, &NullPrivate),
 };
 
 /**
