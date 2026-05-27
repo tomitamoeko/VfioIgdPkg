@@ -87,7 +87,7 @@ GetVbtData (
   /* Validate IGD OpRegion signature and version */
   if (OpRegion) {
     if (CompareMem (OpRegion->Header.SIGN, IGD_OPREGION_HEADER_SIGN, sizeof(OpRegion->Header.SIGN)) != 0) {
-      DEBUG ((EFI_D_ERROR, "%a: Invalid OpRegion signature, expect %s\n",
+      DEBUG ((EFI_D_ERROR, "%a: Invalid OpRegion signature, expect %a\n",
         __FUNCTION__, IGD_OPREGION_HEADER_SIGN));
       return EFI_INVALID_PARAMETER;
     } else {
